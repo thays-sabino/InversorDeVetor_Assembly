@@ -1,0 +1,98 @@
+.data
+vet1: .word 0, 0, 0, 0, 0
+vet2: .word 0, 0, 0, 0, 0
+msg: .asciiz "Digite um numero: "
+msg_original: .asciiz "\nVetor original: "
+msg_inverso: .asciiz "\nVetor inverso: "
+espaco: .asciiz " "
+
+.text
+la $10, vet1    #$10 = endereço do vetor 1
+la $15, vet2    #$15 = endereço do vetor 2
+addi $11, $0, 4
+add $12, $0, $0   #$12 = contador
+
+ler_numeros:slti $14, $12, 5 #loop para ler os 5 números
+beq $14, $0, vet_invertido
+
+la $4, msg #imprime mensagem para digitar número
+li $2, 4
+syscall
+
+li $2, 5 #lê o número
+syscall
+move $8, $2
+
+mul $13, $12, $11  #calcula endereço
+add $13, $13, $10
+sw $8, 0($13)   #armazena no vet1
+
+addi $12, $12, 1
+j ler_numeros
+
+vet_invertido:add $12, $0, $0     #contador do vet1 começa em zero
+addi $17, $0, 4     #contador do vet2 começa em 4
+
+inverter:slti $14, $12, 5
+beq $14, $0, imprimir_vetores
+
+mul $13, $12, $11
+add $13, $13, $10
+lw $8, 0($13)
+
+mul $16, $17, $11  #calcula endereço no vet2
+add $16, $16, $15
+sw $8, 0($16)
+
+addi $12, $12, 1 #contador vet1 somando 1
+addi $17, $17, -1 #contador vet2 subtraindo 1
+j inverter
+    
+imprimir_vetores:la $4, msg_original #mensagem do vet1
+li $2, 4
+syscall
+
+add $12, $0, $0  #reiniciando o contador
+
+imprimir_vet1:slti $14, $12, 5
+beq $14, $0, inicio_vet2
+
+mul $13, $12, $11
+add $13, $13, $10
+lw $4, 0($13)
+
+li $2, 1
+syscall
+
+la $4, espaco #imprime espaço p/ os números não ficarem grudados
+li $2, 4
+syscall
+
+addi $12, $12, 1
+j imprimir_vet1
+
+inicio_vet2:la $4, msg_inverso
+li $2, 4
+syscall
+
+add $12, $0, $0
+
+imprimir_vet2:slti $14, $12, 5
+beq $14, $0, fim
+
+mul $13, $12, $11
+add $13, $13, $15
+lw $4, 0($13)
+
+li $2, 1
+syscall
+
+la $4, espaco
+li $2, 4
+syscall
+
+addi $12, $12, 1
+j imprimir_vet2
+
+fim:li $2, 10  #chamando código de saída(imediato 10 na tabela syscall) p/encerrar o programa
+syscall
